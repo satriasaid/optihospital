@@ -1,0 +1,12 @@
+﻿DepartmentA,DepartmentB,WalkingTime
+Emergency,ICU,2
+Emergency,Pharmacy,4
+ICU,Radiology,3
+ICU,Laboratory,2
+Pharmacy,Wards,5
+Radiology,Operating,7
+Laboratory,Outpatient,4
+Operating,Wards,3
+Outpatient,Emergency,8
+Wards,Operating,3
+Parking,Parking,0

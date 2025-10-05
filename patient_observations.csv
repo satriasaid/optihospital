@@ -1,4 +1,4 @@
-PatientID,Name,Age,Department,UrgencyLevel,TreatmentStatus
+patient_id,name,age,department,urgency,status
 1000,Riley Tran,19,Wards,4,Complete
 1001,Jordan Jones,39,Wards,1,Waiting
 1002,Geo Brown,42,Pharmacy,1,Waiting
