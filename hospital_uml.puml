@@ -1,0 +1,217 @@
+@startuml
+class DSAHeapEntry {
+    - priority: float
+    - value: object
+    + getPriority(): float
+    + setPriority(priority: float)
+    + getValue(): object
+    + setValue(value: object)
+    + __str__(): str
+}
+
+class DSAHeap {
+    - heap: numpy.ndarray
+    - count: int
+    - maxSize: int
+    + add(priority: float, value: object)
+    + remove(): DSAHeapEntry
+    + trickleUp(index: int)
+    + trickleDown(index: int)
+    + display()
+    + heapify(heapArray: numpy.ndarray, numItems: int)
+    + trickleDownArray(heapArray: numpy.ndarray, curIdx: int, numItems: int)
+    + heapSort(array: numpy.ndarray)
+}
+
+DSAHeap --> DSAHeapEntry : uses
+
+class PatientRecord {
+    - patient_id: str
+    - name: str
+    - age: int
+    - department: str
+    - urgency: int
+    - status: str
+    + __str__(): str
+}
+
+class EmergencyRequest {
+    - patient_id: str
+    - expected_time: int
+    - priority: float
+    + __str__(): str
+}
+
+class EmergencyScheduler {
+    - heap: DSAHeap
+    - patientTable: DSAHashTable
+    + compute_priority(urgency: int, expected_time: int): float
+    + insert(patient_id: str, expected_time: int)
+    + peek(): EmergencyRequest
+    + extract_priority(): EmergencyRequest
+    + update(patient_id: str, new_urgency: int, new_expected_time: int)
+}
+
+EmergencyScheduler --> DSAHeap : uses
+EmergencyScheduler --> DSAHashTable : uses
+EmergencyScheduler --> PatientRecord : uses
+EmergencyScheduler --> EmergencyRequest : uses
+
+class DSAHashEntry {
+    - key: object
+    - value: object
+    - state: str
+    + getKey(): object
+    + getValue(): object
+    + setValue(value: object)
+    + getState(): str
+    + setState(state: str)
+}
+
+class DSAHashTable {
+    - hashArray: list
+    - count: int
+    - capacity: int
+    - loadFactor: float
+    - highThreshold: float
+    - lowThreshold: float
+    + _hash(key: object): int
+    + _find_key_index(key: object): int
+    + _ensure_resize()
+    + _ensure_resize_on_remove()
+    + put(key: object, value: object)
+    + get(key: object): object
+    + has_key(key: object): bool
+    + remove(key: object)
+}
+
+DSAHashTable --> DSAHashEntry : uses
+
+class DSALinkedListNode {
+    - value: object
+    - next: DSALinkedListNode
+    + getValue(): object
+    + setValue(value: object)
+    + getNext(): DSALinkedListNode
+    + setNext(next: DSALinkedListNode)
+}
+
+class DSALinkedList {
+    - head: DSALinkedListNode
+    - tail: DSALinkedListNode
+    - count: int
+    + isEmpty(): bool
+    + getCount(): int
+    + insertFirst(value: object)
+    + insertLast(value: object)
+    + removeFirst(): object
+    + removeLast(): object
+    + peekFirst(): object
+    + peekLast(): object
+    + find(value: object): DSALinkedListNode
+    + remove(value: object): bool
+}
+
+DSALinkedList --> DSALinkedListNode : uses
+
+class DSAQueue {
+    + enqueue(value: object)
+    + dequeue(): object
+    + peek(): object
+    + isEmpty(): bool
+}
+
+DSAQueue --|> DSALinkedList : inherits
+
+class DSAVertex {
+    - label: object
+    - value: object
+    - links: DSALinkedList
+    - visited: bool
+    + getLabel(): object
+    + setLabel(label: object)
+    + getValue(): object
+    + setValue(value: object)
+    + getLinks(): DSALinkedList
+    + addLink(vertex: DSAVertex)
+    + getVisited(): bool
+    + setVisited(visited: bool)
+    + toString(): str
+}
+
+class DSAEdge {
+    - fromVertex: DSAVertex
+    - toVertex: DSAVertex
+    - value: object
+    + getFrom(): DSAVertex
+    + getTo(): DSAVertex
+    + getValue(): object
+    + setValue(value: object)
+    + toString(): str
+}
+
+class DSAGraph {
+    - vertices: DSALinkedList
+    - edges: DSALinkedList
+    + addVertex(label: object): DSAVertex
+    + removeVertex(label: object): DSAVertex
+    + hasVertex(label: object): bool
+    + getVertex(label: object): DSAVertex
+    + getVertexCount(): int
+    + addEdge(label1: object, label2: object): DSAEdge
+    + removeEdge(label1: object, label2: object): DSAEdge
+    + hasEdge(label1: object, label2: object): bool
+    + isAdjacent(label1: object, label2: object): bool
+    + getAdjacent(label: object): DSALinkedList
+    + getEdgeCount(): int
+    + display()
+}
+
+DSAGraph --> DSAVertex : uses
+DSAGraph --> DSAEdge : uses
+DSAGraph --> DSALinkedList : uses
+
+class EdgeWeightNode {
+    - nodeA: object
+    - nodeB: object
+    - weight: float
+    + matches(u: object, v: object): bool
+}
+
+class EdgeWeightList {
+    - weights: DSALinkedList
+    + addWeight(u: object, v: object, w: float)
+    + getWeight(u: object, v: object): float
+}
+
+EdgeWeightList --> EdgeWeightNode : uses
+EdgeWeightList --> DSALinkedList : uses
+
+class HospitalGraph {
+    - weightList: EdgeWeightList
+    + addWeightedEdge(label1: object, label2: object, weight: float)
+    + getWeight(label1: object, label2: object): float
+}
+
+HospitalGraph --|> DSAGraph : inherits
+HospitalGraph --> EdgeWeightList : uses
+
+class MapNode {
+    - key: object
+    - value: object
+}
+
+class DSALinkedMap {
+    - ll: DSALinkedList
+    + set(key: object, value: object)
+    + get(key: object): object
+    + has(key: object): bool
+    + keys(): iterator
+}
+
+DSALinkedMap --> MapNode : uses
+DSALinkedMap --> DSALinkedList : uses
+
+note right of EmergencyScheduler : Uses DSAHeap for priority queue\nUses DSAHashTable for patient lookup
+note right of HospitalGraph : Extends DSAGraph with weighted edges
+@enduml

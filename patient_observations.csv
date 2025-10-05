@@ -1,0 +1,101 @@
+PatientID,Name,Age,Department,UrgencyLevel,TreatmentStatus
+1000,Riley Tran,19,Wards,4,Complete
+1001,Jordan Jones,39,Wards,1,Waiting
+1002,Geo Brown,42,Pharmacy,1,Waiting
+1003,Casey Smith,39,Wards,4,Waiting
+1004,Jordan White,79,Wards,3,Complete
+1005,Jordan Wong,53,Parking,5,Critical
+1006,Casey Tran,41,Emergency,5,Critical
+1007,Geo Clark,56,Radiology,1,In Treatment
+1008,Riley Wong,62,Wards,3,Waiting
+1009,Jamie White,39,Pharmacy,2,Waiting
+1010,Jordan Kim,25,Operating,5,Critical
+1011,Pat Smith,99,Radiology,4,Complete
+1012,Geo Wong,39,Outpatient,4,Critical
+1013,Riley Clark,65,Radiology,3,Waiting
+1014,Jamie Kim,37,Parking,4,Critical
+1015,Robin Tran,28,Radiology,2,Waiting
+1016,Taylor Patel,79,Laboratory,2,Transferred
+1017,Morgan Lee,13,Pharmacy,5,Transferred
+1018,Taylor Brown,79,Operating,2,Complete
+1019,Riley Smith,23,Pharmacy,1,Complete
+1020,Pat Wong,56,Radiology,3,Waiting
+1021,Riley Clark,35,Laboratory,5,Complete
+1022,Pat Jones,3,ICU,4,Waiting
+1023,Geo Wong,13,Parking,4,In Treatment
+1024,Jamie Tran,59,Parking,2,Waiting
+1025,Pat Wong,58,Radiology,1,Critical
+1026,Taylor White,21,Parking,3,Complete
+1027,Taylor Patel,3,Parking,3,Transferred
+1028,Alex Patel,15,Operating,3,In Treatment
+1029,Geo Clark,48,Emergency,1,In Treatment
+1030,Geo White,19,Operating,3,Transferred
+1031,Riley Clark,57,Emergency,1,Complete
+1032,Robin Clark,96,Wards,2,Waiting
+1033,Alex Smith,77,Pharmacy,4,Waiting
+1034,Robin Smith,30,Radiology,5,Complete
+1035,Riley Smith,50,Operating,5,Complete
+1036,Alex Tran,25,Emergency,3,In Treatment
+1037,Jamie Brown,78,Emergency,4,Complete
+1038,Jordan Clark,76,Radiology,3,Complete
+1039,Robin Jones,27,Operating,1,Transferred
+1040,Pat Kim,87,Operating,2,Critical
+1041,Robin Wong,33,Wards,1,Critical
+1042,Casey Wong,66,Parking,4,Complete
+1043,Jordan Tran,96,Wards,5,Transferred
+1044,Geo Wong,66,Radiology,1,Critical
+1045,Riley Brown,12,Radiology,5,Critical
+1046,Geo Clark,20,Parking,4,In Treatment
+1047,Robin Lee,98,Operating,5,Critical
+1048,Taylor Lee,58,Emergency,5,Transferred
+1049,Taylor Clark,12,Operating,5,Critical
+1050,Casey Kim,42,Emergency,5,Transferred
+1051,Pat Patel,90,Outpatient,5,Complete
+1052,Alex Jones,14,Pharmacy,5,Transferred
+1053,Casey Tran,53,Laboratory,4,Critical
+1054,Morgan Tran,76,ICU,5,Waiting
+1055,Geo Clark,22,Parking,2,In Treatment
+1056,Casey Smith,12,Pharmacy,1,In Treatment
+1057,Casey Lee,6,Wards,2,Critical
+1058,Geo Wong,88,Wards,2,Critical
+1059,Casey Jones,26,Wards,5,Transferred
+1060,Geo Clark,28,ICU,1,Critical
+1061,Jordan Kim,50,Radiology,3,Complete
+1062,Casey Tran,98,Parking,4,Critical
+1063,Riley Brown,80,Wards,4,Complete
+1064,Alex Jones,78,ICU,2,Complete
+1065,Robin Tran,61,Operating,1,In Treatment
+1066,Taylor Wong,79,Pharmacy,5,Complete
+1067,Pat Kim,91,Pharmacy,1,Transferred
+1068,Jamie White,80,Parking,5,In Treatment
+1069,Jamie Smith,17,Operating,4,Transferred
+1070,Taylor Wong,23,Parking,1,Transferred
+1071,Geo Smith,76,ICU,1,Transferred
+1072,Pat Wong,95,Emergency,4,Waiting
+1073,Jordan Wong,91,Emergency,1,Complete
+1074,Morgan White,33,Laboratory,2,Waiting
+1075,Riley White,34,Outpatient,3,Critical
+1076,Pat Clark,77,Outpatient,1,In Treatment
+1077,Alex Tran,82,Pharmacy,4,Critical
+1078,Taylor Wong,75,Wards,3,Transferred
+1079,Morgan Brown,78,Operating,3,Waiting
+1080,Riley Lee,24,Laboratory,1,Complete
+1081,Morgan Lee,32,Outpatient,5,Waiting
+1082,Robin Smith,38,Pharmacy,3,Complete
+1083,Alex Wong,26,Wards,3,Complete
+1084,Casey White,46,Parking,3,Complete
+1085,Jordan Kim,41,Radiology,1,Waiting
+1086,Riley Wong,10,Radiology,5,In Treatment
+1087,Jamie Jones,57,Pharmacy,4,Critical
+1088,Morgan Clark,81,Wards,1,Waiting
+1089,Morgan Brown,4,Emergency,1,Transferred
+1090,Geo Kim,86,Emergency,3,Transferred
+1091,Morgan Wong,16,Emergency,2,Waiting
+1092,Jamie Patel,66,Laboratory,5,Complete
+1093,Taylor Patel,83,Parking,3,Transferred
+1094,Morgan Lee,41,Emergency,3,Transferred
+1095,Robin Tran,66,Pharmacy,2,Complete
+1096,Alex Clark,93,Laboratory,1,Transferred
+1097,Riley Wong,94,Outpatient,3,In Treatment
+1098,Casey Patel,92,Laboratory,3,Critical
+1099,Taylor Brown,10,Radiology,5,In Treatment
