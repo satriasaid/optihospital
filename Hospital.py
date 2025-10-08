@@ -1,5 +1,5 @@
-from Graph import *
-from LinkedList import *
+from Graph import * # Source: 21522611_COMP5008_Prac06
+from LinkedList import * # Source: 21522611_COMP5008_Prac04
 
 class EdgeWeightNode:
     def __init__(self, nodeA, nodeB, weight):
@@ -145,6 +145,7 @@ def bfs_group_by_level(graph, startLabel):
         levelIdx += 1
 
 def a_star_shortest_path(graph, weightList, src, dst):
+    # Source: https://www.geeksforgeeks.org/python/a-search-algorithm-in-python/
     pq = PriorityQueue()
     dist = DSALinkedMap()
     prev = DSALinkedMap()
