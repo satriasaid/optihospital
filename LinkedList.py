@@ -142,6 +142,8 @@ class DSAQueue:
         print("Queue contents:")
         self.list.display()
 
+# Source: https://www.geeksforgeeks.org/dsa/priority-queue-using-linked-list/
+# put the lowest priority as the head to ensure the shortest path in A* algorithm to be printed
 class PQNode:
     def __init__(self, item, priority):
         self.item = item
@@ -156,7 +158,6 @@ class PriorityQueue:
     
     def enqueue(self, item, priority):
         newNode = PQNode(item, priority)
-        # Insert in order (lowest priority first)
         dsaNode = DSAListNode(newNode)
         if self.list.isEmpty():
             self.list.insertFirst(newNode)

@@ -1,6 +1,9 @@
 import numpy as np
 import time
-from AdvancedSort import mergeSort, quickSortMedian3
+from AdvancedSort import mergeSort, quickSortMedian3 # Source: 21522611_COMP5008 - Prac09
+from HashTable import *
+from Emergency import *
+from Patients import *
 
 def generate_patients_np(size, seed=42, disorder="random"):
     np.random.seed(seed)
@@ -25,65 +28,65 @@ def generate_patients_np(size, seed=42, disorder="random"):
         arr[i] = rec
     return arr
 
-# Create duration numpy array from PatientRecords
-def durations_from_patients(arr):
-    dur_arr = np.zeros(arr.size, dtype=float)
+def priorities_from_patients(arr, scheduler):
+    pri_arr = np.zeros(arr.size, dtype=float)
     for i in range(arr.size):
-        dur_arr[i] = arr[i].duration
-    return dur_arr
+        patient = arr[i]
+        pri_arr[i] = scheduler.compute_priority(patient.urgency, patient.duration)
+    return pri_arr
 
-# Rebuild record array sorted by durations (stable, no lists)
-def stable_patients_by_duration(sorted_durations, original_patients):
-    size = sorted_durations.size
+def stable_patients_by_priority(sorted_priorities, original_patients):
+    size = sorted_priorities.size
     sorted_arr = np.empty(size, dtype=object)
     used = np.zeros(size, dtype=bool)
     for i in range(size):
-        v = sorted_durations[i]
+        v = sorted_priorities[i]
         for j in range(size):
-            if not used[j] and original_patients[j].duration == v:
-                sorted_arr[i] = original_patients[j]
-                used[j] = True
-                break
+            if not used[j]:
+                patient = original_patients[j]
+                priority = (6 - patient.urgency) + (1000 / patient.duration)
+                if priority == v:
+                    sorted_arr[i] = patient
+                    used[j] = True
+                    break
     return sorted_arr
 
-def benchmark_sorts_np():
-    sizes = np.array([100, 500, 1000])
-    disorders = np.array(["random", "nearly_sorted", "reversed"])
+def benchmark_sorts_np(sizes, disorders):
     results_dtype = [('size', 'i4'), ('disorder', 'U14'), ('merge_time', 'f8'), ('quick_time', 'f8'), ('merge_ok', '?'), ('quick_ok', '?')]
-    results = np.empty(sizes.size * disorders.size, dtype=results_dtype)
+    results = np.empty(len(sizes) * len(disorders), dtype=results_dtype)
     idx = 0
-    for si in range(sizes.size):
-        for di in range(disorders.size):
-            size = sizes[si]
-            disorder = disorders[di]
+    dummy_table = DSAHashTable()
+    scheduler = EmergencyScheduler(1, dummy_table)
+    for size in sizes:
+        for disorder in disorders:
             patients = generate_patients_np(size, seed=42, disorder=disorder)
-            arr_merge = durations_from_patients(patients)
+            arr_merge = priorities_from_patients(patients, scheduler)
             t0 = time.time()
             mergeSort(arr_merge)
             t1 = time.time()
-            sorted_merge = stable_patients_by_duration(arr_merge, patients)
+            sorted_merge = stable_patients_by_priority(arr_merge, patients)
             patients_copy = np.copy(patients)
-            arr_quick = durations_from_patients(patients_copy)
+            arr_quick = priorities_from_patients(patients_copy, scheduler)
             t2 = time.time()
             quickSortMedian3(arr_quick)
             t3 = time.time()
-            sorted_quick = stable_patients_by_duration(arr_quick, patients_copy)
+            sorted_quick = stable_patients_by_priority(arr_quick, patients_copy)
             merge_ok = True
             quick_ok = True
             for k in range(size-1):
-                if sorted_merge[k].duration > sorted_merge[k+1].duration:
-                    merge_ok = False
-                    break
+                if sorted_merge[k] is not None and sorted_merge[k+1] is not None:
+                    pri1 = (6 - sorted_merge[k].urgency) + (1000 / sorted_merge[k].duration)
+                    pri2 = (6 - sorted_merge[k+1].urgency) + (1000 / sorted_merge[k+1].duration)
+                    if pri1 > pri2:
+                        merge_ok = False
+                        break
             for k in range(size-1):
-                if sorted_quick[k].duration > sorted_quick[k+1].duration:
-                    quick_ok = False
-                    break
+                if sorted_quick[k] is not None and sorted_quick[k+1] is not None:
+                    pri1 = (6 - sorted_quick[k].urgency) + (1000 / sorted_quick[k].duration)
+                    pri2 = (6 - sorted_quick[k+1].urgency) + (1000 / sorted_quick[k+1].duration)
+                    if pri1 > pri2:
+                        quick_ok = False
+                        break
             results[idx] = (size, disorder, t1-t0, t3-t2, merge_ok, quick_ok)
             idx += 1
-    print("\n| Size | Input Condition | MergeSort (s) | QuickSort (s) | Merge OK | Quick OK |")
-    print("|------|----------------|---------------|--------------|----------|----------|")
-    for i in range(results.size):
-        r = results[i]
-        print(f"| {r['size']:<4} | {r['disorder']:<14} | {r['merge_time']:<13.5f} | {r['quick_time']:<12.5f} | {str(r['merge_ok']):<8} | {str(r['quick_ok']):<8} |")
-
-benchmark_sorts_np()
+    return results

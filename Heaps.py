@@ -82,9 +82,9 @@ class DSAHeap:
                 rightChildIdx = leftChildIdx + 1
     
     def display(self):
-        print("Heap contents:")
-        for i in range(self.count):
-            print(f"    Index {i}: {self.heap[i]}")
+        # print("Heap contents:")
+        # for i in range(self.count):
+        #     print(f"    Index {i}: {self.heap[i]}")
         print()
 
 def heapify(heapArray, numItems):

@@ -4,182 +4,25 @@ import networkx as nx
 import matplotlib.pyplot as plt
 import sys
 import io
+import matplotlib.pyplot as plt
 
-# Import your custom hospital logic
+# importing custom classes and functions
 from Hospital import *
+from Hospital_Func import bfs_group_by_level, dfs_detect_cycle, a_star_shortest_path
 from Graph import *
 from LinkedList import *
 from Patients import *
+from PatientSort import benchmark_sorts_np
 from Heaps import *
 from Emergency import *
 
-# Graph Algorithm Functions (copied from notebook for integration)
-def bfs_group_by_level(graph, startLabel):
-    # Output: departments grouped into DSALinkedList-of-DSALinkedList (hops)
-    visited = DSALinkedMap()
-    levels = DSALinkedMap()
-    result = DSALinkedList()  # Each value is DSALinkedList of nodes for that level
-
-    queue = DSAQueue()
-    queue.enqueue(graph.getVertex(startLabel))
-    visited.set(startLabel, True)
-    levels.set(startLabel, 0)
-
-    maxLevel = 0
-
-    while not queue.isEmpty():
-        currNode = queue.dequeue()
-        currLabel = currNode.getLabel()
-        currLevel = levels.get(currLabel)
-        if currLevel > maxLevel:
-            maxLevel = currLevel
-
-        # Place in correct level bucket
-        currLevelList = result.head
-        levelFound = False
-        levelIdx = 0
-        for i in range(currLevel+1):
-            if currLevelList is None:
-                ll = DSALinkedList()
-                result.insertLast(ll)
-                currLevelList = result.tail
-            currLevelList = currLevelList.getNext()
-
-        levelList = result.head
-        for i in range(currLevel):
-            if levelList is not None:
-                levelList = levelList.getNext()
-        if levelList is not None:
-            levelList.getValue().insertLast(currLabel)
-
-        nbrs = currNode.getLinks().head
-        while nbrs is not None:
-            nNode = nbrs.getValue()
-            nLabel = nNode.getLabel()
-            if not visited.has(nLabel):
-                queue.enqueue(nNode)
-                visited.set(nLabel, True)
-                levels.set(nLabel, currLevel+1)
-            nbrs = nbrs.getNext()
-
-    # Print level grouping
-    print("BFS Groups by Level (hops):")
-    levelPtr = result.head
-    levelIdx = 0
-    while levelPtr is not None:
-        print("Level", levelIdx, ":", end=" ")
-        levelList = levelPtr.getValue()
-        nPtr = levelList.head
-        while nPtr is not None:
-            print(nPtr.getValue(), end=", ")
-            nPtr = nPtr.getNext()
-        print()
-        levelPtr = levelPtr.getNext()
-        levelIdx += 1
-
-def dfs_detect_cycle(graph, startLabel):
-    foundCycle = False
-    parentMap = DSALinkedMap()
-    onPath = DSALinkedMap()
-    cycleStart = None
-    cycleEnd = None
-
-    def visit(node, parent):
-        nonlocal foundCycle, cycleStart, cycleEnd
-        label = node.getLabel()
-        onPath.set(label, True)
-        nbrs = node.getLinks().head
-        while nbrs is not None:
-            nbrNode = nbrs.getValue()
-            nbrLabel = nbrNode.getLabel()
-            if parent is not None and nbrLabel == parent.getLabel():
-                nbrs = nbrs.getNext()
-                continue
-            if onPath.has(nbrLabel):
-                # found cycle
-                foundCycle = True
-                cycleStart = nbrLabel
-                cycleEnd = label
-                parentMap.set(nbrLabel, label)
-                return True
-            if not parentMap.has(nbrLabel):
-                parentMap.set(nbrLabel, label)
-                if visit(nbrNode, node):
-                    return True
-            nbrs = nbrs.getNext()
-        onPath.set(label, False)
-        return False
-
-    root = graph.getVertex(startLabel)
-    parentMap.set(startLabel, None)
-    visit(root, None)
-    print("DFS Cycle Detection:")
-    if not foundCycle:
-        print("No cycles found.")
-    else:
-        # Trace cycle path using LinkedMap parent pointers
-        pathLL = DSALinkedList()
-        curr = cycleEnd
-        while curr != cycleStart:
-            pathLL.insertFirst(curr)
-            curr = parentMap.get(curr)
-        pathLL.insertFirst(cycleStart)
-        print("Cycle found: ", end=" ")
-        p = pathLL.head
-        while p is not None:
-            print(p.getValue(), end=", ")
-            p = p.getNext()
-        print()
-
-def a_star_shortest_path(graph, weightList, src, dst):
-    pq = PriorityQueue()
-    dist = DSALinkedMap()
-    prev = DSALinkedMap()
-    pq.enqueue(src, 0)
-    dist.set(src, 0)
-    prev.set(src, None)
-
-    while not pq.isEmpty():
-        curr, currCost = pq.dequeue()
-        currLabel = curr
-        if currLabel == dst:
-            break
-        node = graph.getVertex(currLabel)
-        nbrs = node.getLinks().head
-        while nbrs is not None:
-            nbrNode = nbrs.getValue()
-            nbrLabel = nbrNode.getLabel()
-            w = weightList.getWeight(currLabel, nbrLabel)
-            alt = dist.get(currLabel) + w
-            if not dist.has(nbrLabel) or alt < dist.get(nbrLabel):
-                dist.set(nbrLabel, alt)
-                prev.set(nbrLabel, currLabel)
-                pq.enqueue(nbrLabel, alt)  # heuristic=0
-            nbrs = nbrs.getNext()
-
-    # Reconstruct path
-    pathLL = DSALinkedList()
-    crawl = dst
-    if not prev.has(dst):
-        print("No path found")
-        return
-    while crawl is not None:
-        pathLL.insertFirst(crawl)
-        crawl = prev.get(crawl)
-    print("Shortest path from", src, "to", dst, ": ", end="")
-    p = pathLL.head
-    while p is not None:
-        print(p.getValue(), end=", ")
-        p = p.getNext()
-    print("\nTotal walking time:", dist.get(dst)," minute(s)")
-
-# Main UI with tabs
-tab1, tab2, tab3 = st.tabs(["Hospital Graph", "Patient Records", "Patient Priority Queue"])
+# the setup of tabs in the main webpage
+tab1, tab2, tab3, tab4 = st.tabs(["Hospital Graph", "Patient Records", "Patient Priority Queue", "Sorting Benchmarks"])
 
 with tab1:
     st.header("Hospital Graph Builder")
 
-    # Departments CSV Upload
+    # Allowing CSV upload of departments
     st.subheader("Departments (Nodes)")
     departments_file = st.file_uploader("Upload Departments CSV (column: Department)", type="csv", key="departments_csv")
     departments = []
@@ -192,7 +35,7 @@ with tab1:
         else:
             st.error("CSV must have a 'Department' column.")
 
-    # Corridors CSV Upload
+    # Allowing CSV upload of corridors of the previously uploaded departments
     st.subheader("Corridors (Edges)")
     corridors_file = st.file_uploader("Upload Corridors CSV (columns: DepartmentA, DepartmentB, WalkingTime)", type="csv", key="corridors_csv")
     corridors = []
@@ -211,17 +54,14 @@ with tab1:
         else:
             st.error("CSV must have 'DepartmentA', 'DepartmentB', and 'WalkingTime' columns.")
 
+    # Create hospital map's graph
     if st.button("Visualize Hospital Graph") and departments and corridors:
-        # -- Update HospitalGraph module object (your core logic) --
         hgraph = HospitalGraph()
-        # Add nodes (departments)
         for dept in departments:
             hgraph.addVertex(dept)
-        # Add edges
         for u, v, w in corridors:
             hgraph.addWeightedEdge(u, v, w)
 
-        # -- Visualize using NetworkX (for display only) --
         G = nx.Graph()
         for dept in departments:
             G.add_node(dept)
@@ -235,19 +75,21 @@ with tab1:
         ax.set_title("Hospital Departments and Corridors")
         st.pyplot(fig)
 
-        # Optionally, print your adjacency/weight structure using HospitalGraph module methods
-        st.write("Adjacency List from Module:")
+        # Print adjacency list in the web page
+        # Source: https://stackoverflow.com/questions/16571150/how-to-capture-stdout-output-from-a-python-function-call
+        st.write("Adjacency List:")
         buf = io.StringIO()
         sys.stdout = buf
-        hgraph.displayAsList()  # Provided in your module
+        hgraph.displayAsList()
         sys.stdout = sys.__stdout__
         st.text(buf.getvalue())
 
-        # Store hgraph in session state for use in other buttons
+        # preserve value in the session
+        # Source: https://docs.streamlit.io/develop/api-reference/caching-and-state/st.session_state
         st.session_state['hgraph'] = hgraph
-        st.session_state['weightList'] = hgraph.weightList  # Assuming weightList is accessible
+        st.session_state['weightList'] = hgraph.weightList
 
-    # Algorithm Inputs and Buttons (only show if graph is built)
+    # BFS for hopping and DFS for cycle detection
     if 'hgraph' in st.session_state:
         st.subheader("Graph Algorithms")
         
@@ -275,6 +117,7 @@ with tab1:
             else:
                 st.error("Start node not in departments.")
         
+        # A* shortest path across two different departments
         src = st.text_input("Source Node for A*:", value="Emergency", key="src")
         dst = st.text_input("Destination Node for A*:", value="ICU", key="dst")
         
@@ -292,13 +135,13 @@ with tab1:
 with tab2:
     st.header("Patient Records Management")
 
-    # Initialize patient records in session state
+    # initialise patient in the session
     if 'patients' not in st.session_state:
         st.session_state['patients'] = HashPatientRecords()
 
     patients = st.session_state['patients']
 
-    # Load CSV
+    # Allowing to upload csv
     st.subheader("Load Patients from CSV")
     patients_file = st.file_uploader("Upload Patients CSV (columns: patient_id, name, age, department, urgency, status)", type="csv", key="patients_csv")
     if patients_file is not None and st.button("Load CSV"):
@@ -318,7 +161,7 @@ with tab2:
         else:
             st.error("CSV must have columns: patient_id, name, age, department, urgency, status.")
 
-    # Insert New Patient
+    # Allowing to add new patient into the webpage system
     st.subheader("Insert New Patient")
     with st.form("insert_patient"):
         pid = st.text_input("Patient ID")
@@ -332,18 +175,24 @@ with tab2:
             try:
                 record = PatientRecord(pid, name, age, department, urgency, status)
                 patients.insert(record)
-                # Add to dataframe if loaded
                 if 'patients_df' in st.session_state:
-                    new_row = pd.DataFrame([{
-                        "patient_id": pid, "name": name, "age": age, 
-                        "department": department, "urgency": urgency, "status": status
-                    }])
-                    st.session_state['patients_df'] = pd.concat([st.session_state['patients_df'], new_row], ignore_index=True)
-                st.success("Patient inserted.")
+                    df = st.session_state['patients_df']
+                    if str(pid) in df['patient_id'].astype(str).values:
+                        # Update existing row
+                        df.loc[df['patient_id'].astype(str) == str(pid), ['name', 'age', 'department', 'urgency', 'status']] = [name, age, department, urgency, status]
+                        st.session_state['patients_df'] = df
+                    else:
+                        # Add new row
+                        new_row = pd.DataFrame([{
+                            "patient_id": pid, "name": name, "age": age, 
+                            "department": department, "urgency": urgency, "status": status
+                        }])
+                        st.session_state['patients_df'] = pd.concat([df, new_row], ignore_index=True)
+                st.success("Patient inserted/updated.")
             except Exception as e:
                 st.error(f"Insert error: {e}")
 
-    # Search Patient
+    # Patient Lookup
     st.subheader("Search Patient")
     search_id = st.text_input("Patient ID to Search")
     if st.button("Search"):
@@ -354,16 +203,15 @@ with tab2:
         else:
             st.error("Patient not found.")
 
-    # Delete Patient
+    # Patient Removal
     st.subheader("Delete Patient")
     delete_id = st.text_input("Patient ID to Delete")
     if st.button("Delete"):
         patients.delete(delete_id)
-        # Remove from dataframe if loaded
         if 'patients_df' in st.session_state:
-            st.session_state['patients_df'] = st.session_state['patients_df'][st.session_state['patients_df']['patient_id'] != delete_id]
+            st.session_state['patients_df'] = st.session_state['patients_df'][st.session_state['patients_df']['patient_id'].astype(str) != str(delete_id)]
 
-    # View All Patients
+    # Show list of patients
     st.subheader("All Patient Records")
     if 'patients_df' in st.session_state:
         st.dataframe(st.session_state['patients_df'])
@@ -373,13 +221,13 @@ with tab2:
 with tab3:
     st.header("Emergency Scheduler")
 
-    # Initialize scheduler in session state
+    # Add scheduler to the session state
     if 'scheduler' not in st.session_state:
-        st.session_state['scheduler'] = EmergencyScheduler(1000, st.session_state['patients'])  # Assuming patients is loaded
+        st.session_state['scheduler'] = EmergencyScheduler(1000, st.session_state['patients']) # need to load the patient data
 
     scheduler = st.session_state['scheduler']
 
-    # Load CSV
+    # Allow to upload CSV
     st.subheader("Load Patients from CSV")
     pq_file = st.file_uploader("Upload patient_treatment.csv", type="csv", key="pq_csv")
     if pq_file is not None and st.button("Load CSV for Scheduler"):
@@ -397,7 +245,7 @@ with tab3:
         else:
             st.error("CSV must have columns: patient_id, expected_time.")
 
-    # Peek
+    # Peek the item with the highest priority
     st.subheader("Peek Highest Priority")
     if st.button("Peek"):
         buf = io.StringIO()
@@ -406,7 +254,7 @@ with tab3:
         sys.stdout = sys.__stdout__
         st.text("Peek Output:")
         st.text(buf.getvalue())
-        # Show heap contents as dataframe
+        # print the table of to know the current and next priority
         contents = []
         for i in range(scheduler.heap.count):
             entry = scheduler.heap.heap[i]
@@ -421,7 +269,7 @@ with tab3:
             df = pd.DataFrame(contents)
             st.dataframe(df)
 
-    # Extract Priority
+    # print the table of to know the next priority after the current priority is extracted
     st.subheader("Extract Highest Priority")
     if st.button("Extract"):
         buf = io.StringIO()
@@ -430,7 +278,6 @@ with tab3:
         sys.stdout = sys.__stdout__
         st.text("Extract Output:")
         st.text(buf.getvalue())
-        # Show heap contents as dataframe after extraction
         contents = []
         for i in range(scheduler.heap.count):
             entry = scheduler.heap.heap[i]
@@ -445,7 +292,7 @@ with tab3:
             df = pd.DataFrame(contents)
             st.dataframe(df)
 
-    # Update
+    # feature to update the patient's priority based on urgency and new expected time
     st.subheader("Update Patient")
     with st.form("update_sched"):
         pid = st.text_input("Patient ID")
@@ -459,3 +306,42 @@ with tab3:
             sys.stdout = sys.__stdout__
             st.text("Update Output:")
             st.text(buf.getvalue())
+
+with tab4:
+    st.header("Sorting Benchmarks")
+
+    st.subheader("Benchmark Parameters")
+    sizes_input = st.text_input("Sizes (comma-separated, e.g., 10,50,100,500,1000,5000,10000)", value="10,50,100,500,1000,5000,10000")
+    disorders_input = st.text_input("Disorders (comma-separated, e.g., random,nearly_sorted,reversed)", value="random,nearly_sorted,reversed")
+
+    if st.button("Run Benchmark"):
+        try:
+            sizes = [int(s.strip()) for s in sizes_input.split(',')]
+            disorders = [d.strip() for d in disorders_input.split(',')]
+            results = benchmark_sorts_np(sizes, disorders)
+            
+            df = pd.DataFrame({
+                'Size': results['size'],
+                'Input Condition': results['disorder'],
+                'MergeSort (s)': results['merge_time'],
+                'QuickSort (s)': results['quick_time'],
+                'Merge OK': results['merge_ok'],
+                'Quick OK': results['quick_ok']
+            })
+            st.dataframe(df)
+            
+            # plot the performance of sorting in a graph
+            fig, ax = plt.subplots(figsize=(10, 6))
+            for disorder in disorders:
+                subset = df[df['Input Condition'] == disorder]
+                ax.plot(subset['Size'], subset['MergeSort (s)'], label=f'MergeSort - {disorder}', marker='o')
+                ax.plot(subset['Size'], subset['QuickSort (s)'], label=f'QuickSort - {disorder}', marker='s')
+            ax.set_xlabel('Size')
+            ax.set_ylabel('Time (s)')
+            ax.set_title('Sorting Algorithm Performance by Priority')
+            ax.legend()
+            ax.set_xscale('log')
+            ax.set_yscale('log')
+            st.pyplot(fig)
+        except Exception as e:
+            st.error(f"Error running benchmark: {e}")
