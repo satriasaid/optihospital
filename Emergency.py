@@ -1,5 +1,4 @@
 from Heaps import DSAHeap
-from HashTable import DSAHashTable
 
 class EmergencyRequest:
     def __init__(self, patient_id, expected_time):
@@ -43,7 +42,7 @@ class EmergencyScheduler:
         if self.heap.count == 0:
             print("Heap is empty.")
             return None
-        entry = self.heap.heap[0] # because the heap is saved in an array, that is why .heap[0]
+        entry = self.heap.heap[0]
         print(f"Peek: {entry.getValue()} (Priority={entry.getPriority():.2f})")
         return entry.getValue()
     

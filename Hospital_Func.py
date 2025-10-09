@@ -63,15 +63,18 @@ def bfs_group_by_level(graph, startLabel):
         levelPtr = levelPtr.getNext()
         levelIdx += 1
 
+class CycleState:
+    def __init__(self):
+        self.foundCycle = False
+        self.cycleStart = None
+        self.cycleEnd = None
+
 def dfs_detect_cycle(graph, startLabel):
-    foundCycle = False
     parentMap = DSALinkedMap()
     onPath = DSALinkedMap()
-    cycleStart = None
-    cycleEnd = None
+    state = CycleState()
 
     def visit(node, parent):
-        nonlocal foundCycle, cycleStart, cycleEnd
         label = node.getLabel()
         onPath.set(label, True)
         nbrs = node.getLinks().head
@@ -82,10 +85,9 @@ def dfs_detect_cycle(graph, startLabel):
                 nbrs = nbrs.getNext()
                 continue
             if onPath.has(nbrLabel):
-                # when a cycle is found
-                foundCycle = True
-                cycleStart = nbrLabel
-                cycleEnd = label
+                state.foundCycle = True
+                state.cycleStart = nbrLabel
+                state.cycleEnd = label
                 parentMap.set(nbrLabel, label)
                 return True
             if not parentMap.has(nbrLabel):
@@ -100,15 +102,15 @@ def dfs_detect_cycle(graph, startLabel):
     parentMap.set(startLabel, None)
     visit(root, None)
     print("DFS Cycle Detection:")
-    if not foundCycle:
+    if not state.foundCycle:
         print("No cycles found.")
     else:
         pathLL = DSALinkedList()
-        curr = cycleEnd
-        while curr != cycleStart:
+        curr = state.cycleEnd
+        while curr != state.cycleStart:
             pathLL.insertFirst(curr)
             curr = parentMap.get(curr)
-        pathLL.insertFirst(cycleStart)
+        pathLL.insertFirst(state.cycleStart)
         print("Cycle found: ", end=" ")
         p = pathLL.head
         while p is not None:
