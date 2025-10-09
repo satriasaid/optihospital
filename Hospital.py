@@ -80,7 +80,9 @@ class DSALinkedMap:
         return False
 
     def keys(self):
+        key_list = DSALinkedList()
         curr = self.ll.head
         while curr is not None:
-            yield curr.getValue().key
+            key_list.insertLast(curr.getValue().key)
             curr = curr.getNext()
+        return key_list
