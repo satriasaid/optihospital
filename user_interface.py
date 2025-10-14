@@ -15,10 +15,9 @@ from Hospital_Func import bfs_group_by_level, dfs_detect_cycle, a_star_shortest_
 from Graph import *
 from LinkedList import *
 from Patients import *
-from PatientSort import benchmark_sorts_np
 from Heaps import *
 from Emergency import *
-from PatientSort import benchmark_sorts_np, generate_patients_np, priorities_from_patients, stable_patients_by_priority
+from PatientSort import benchmark_sorts_np, generate_patients_np, durations_from_patients, stable_patients_by_duration
 from HashTable import DSAHashTable
 from Emergency import EmergencyScheduler
 from AdvancedSort import mergeSort, quickSortMedian3
@@ -345,7 +344,7 @@ with tab4:
                 ax.plot(subset['Size'], subset['QuickSort (s)'], label=f'QuickSort - {disorder}', marker='s')
             ax.set_xlabel('Size')
             ax.set_ylabel('Time (s)')
-            ax.set_title('Sorting Algorithm Performance by Priority')
+            ax.set_title('Sorting Algorithm Performance by Treatment Time')
             ax.legend()
             ax.set_xscale('log')
             ax.set_yscale('log')
@@ -367,17 +366,17 @@ with tab4:
         # Generate patients
         patients = generate_patients_np(size, seed=seed, disorder=disorder)
 
-        # Compute priorities
-        priorities = priorities_from_patients(patients, scheduler)
+        # Compute durations
+        durations = durations_from_patients(patients)
 
         # Function to write patients to CSV
-        def write_patients_to_csv(filename, patients_array, priorities_array=None):
+        def write_patients_to_csv(filename, patients_array, durations_array=None):
             with open(filename, 'w', newline='') as csvfile:
-                fieldnames = ['Patient_ID', 'Name', 'Age', 'Department', 'Urgency', 'Status', 'Duration', 'Priority']
+                fieldnames = ['Patient_ID', 'Name', 'Age', 'Department', 'Urgency', 'Status', 'Duration']
                 writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
                 writer.writeheader()
                 for i, patient in enumerate(patients_array):
-                    priority = priorities_array[i] if priorities_array is not None else (6 - patient.urgency) + (1000 / patient.duration)
+                    duration = durations_array[i] if durations_array is not None else patient.duration
                     writer.writerow({
                         'Patient_ID': patient.patient_id,
                         'Name': patient.name,
@@ -385,25 +384,22 @@ with tab4:
                         'Department': patient.department,
                         'Urgency': patient.urgency,
                         'Status': patient.status,
-                        'Duration': patient.duration,
-                        'Priority': priority
+                        'Duration': duration
                     })
 
         # Non-sorted CSV
-        write_patients_to_csv('patients_nonsorted.csv', patients, priorities)
+        write_patients_to_csv('patients_nonsorted.csv', patients, durations)
 
         # Sorted CSV: sort priorities in descending order (highest priority first)
-        sorted_priorities = np.copy(priorities)
+        sorted_durations = np.copy(durations)
         t0 = time.time()
         if sort_algorithm == "mergeSort":
-            mergeSort(sorted_priorities)
+            mergeSort(sorted_durations)
         elif sort_algorithm == "quickSortMedian3":
-            quickSortMedian3(sorted_priorities)
+            quickSortMedian3(sorted_durations)
         t1 = time.time()
         sort_time = t1 - t0
-        # Reverse the sorted array to have highest priority first
-        sorted_priorities = sorted_priorities[::-1]
-        sorted_patients = stable_patients_by_priority(sorted_priorities, patients)
-        write_patients_to_csv('patients_sorted.csv', sorted_patients, sorted_priorities)
+        sorted_patients = stable_patients_by_duration(sorted_durations, patients)
+        write_patients_to_csv('patients_sorted.csv', sorted_patients, sorted_durations)
 
         st.success(f"CSVs generated: patients_nonsorted.csv and patients_sorted.csv. Sorting time: {sort_time:.6f} seconds")

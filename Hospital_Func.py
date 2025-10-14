@@ -104,8 +104,10 @@ def dfs_detect_cycle(graph, startLabel):
             is_parent = (nbr == parent)
             if not is_parent:
                 if not nbr.getVisited():
+                    #if not parent and not visited yet, recursively go deeper
                     dfs(nbr, current)
                 else:
+                    # if visited, check if the edge leads to the parent
                     pCurr = path.head
                     in_path = False
                     while pCurr is not None:
@@ -113,6 +115,7 @@ def dfs_detect_cycle(graph, startLabel):
                             in_path = True
                         pCurr = pCurr.getNext()
                     if in_path:
+                        # find where the cycle starts in the path
                         idx = 0
                         pCurr = path.head
                         found = False
@@ -122,15 +125,18 @@ def dfs_detect_cycle(graph, startLabel):
                             else:
                                 idx += 1
                                 pCurr = pCurr.getNext()
+                        # copy from that point to the end of the cycle        
                         cycle = DSALinkedList()
                         pCurr = path.head
                         count = 0
+                        # copy nodes from path[idx] to path[end]
                         while pCurr is not None and count < idx:
                             pCurr = pCurr.getNext()
                             count += 1
                         while pCurr is not None:
                             cycle.insertLast(pCurr.getValue())
                             pCurr = pCurr.getNext()
+                        # close the cycle     
                         cycle.insertLast(nbr.getLabel())
                         contains_start = False
                         clCurr = cycle.head
@@ -138,6 +144,7 @@ def dfs_detect_cycle(graph, startLabel):
                             if clCurr.getValue() == startLabel:
                                 contains_start = True
                             clCurr = clCurr.getNext()
+                        # check if the cycle is the longest
                         if contains_start and getLength(cycle) > getLength(longest_cycle):
                             longest_cycle.head = None
                             longest_cycle.tail = None
@@ -146,6 +153,7 @@ def dfs_detect_cycle(graph, startLabel):
                                 longest_cycle.insertLast(clCurr.getValue())
                                 clCurr = clCurr.getNext()
             lCurr = lCurr.getNext()
+        # backtrack
         removeLast(path)
     
     dfs(node, None)

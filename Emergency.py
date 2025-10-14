@@ -76,4 +76,4 @@ class EmergencyScheduler:
         expected_time = new_expected_time if new_expected_time is not None else 30
         self.remove_patient(patient_id)
         self.insert(patient_id, expected_time)
-        print(f"Update: Patient {patient_id} updated with urgency {patient.urgency} and expected time {expected_time}.")
+        #print(f"Update: Patient {patient_id} updated with urgency {patient.urgency} and expected time {expected_time}.")
