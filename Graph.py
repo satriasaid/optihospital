@@ -9,10 +9,9 @@ class DSAGraphNode:
     def addLink(self, otherNode):
         curr = self.links.head
         notPresent = True
-        while curr is not None:
+        while curr is not None and notPresent:
             if curr.getValue() == otherNode:
                 notPresent = False
-                break
             curr = curr.getNext()
         if notPresent:
             self.links.insertLast(otherNode)
@@ -42,19 +41,22 @@ class DSAGraph:
         curr = self.vertices.head
         prev = None
         foundNode = None
-        while curr.getValue().getLabel() == label:
-            foundNode = curr.getValue()
-            if prev is None:
-                self.vertices.head = curr.getNext()
-                if self.vertices.tail == curr:
-                    self.vertices.tail = None
+        deleted = False
+        while curr is not None and not deleted:
+            if curr.getValue().getLabel() == label:
+                foundNode = curr.getValue()
+                if prev is None:
+                    self.vertices.head = curr.getNext()
+                    if self.vertices.tail == curr:
+                        self.vertices.tail = None
+                else:
+                    prev.setNext(curr.getNext())
+                    if self.vertices.tail == curr:
+                        self.vertices.tail = prev
+                deleted = True
             else:
-                prev.setNext(curr.getNext())
-                if self.vertices.tail == curr:
-                    self.vertices.tail = prev
-            break
-        prev = curr
-        curr = curr.getNext()
+                prev = curr
+                curr = curr.getNext()
 
         if foundNode is not None:
             curr = self.vertices.head
@@ -79,7 +81,8 @@ class DSAGraph:
     def _removeLink(self, adjList, targetNode):
         curr = adjList.head
         prev = None
-        while curr is not None:
+        removed = False
+        while curr is not None and not removed:
             if curr.getValue() == targetNode:
                 if prev is None:
                     adjList.head = curr.getNext()
@@ -89,11 +92,11 @@ class DSAGraph:
                     prev.setNext(curr.getNext())
                     if adjList.tail == curr:
                         adjList.tail = prev
-            break
-        prev = curr
-        curr = curr.getNext()
+                removed = True
+            else:
+                prev = curr
+                curr = curr.getNext()
             
-    
     def getVertex(self, label):
         curr = self.vertices.head
         while curr is not None:
@@ -184,11 +187,13 @@ class DSAGraph:
             while colcurr is not None:
                 found = 0
                 lCurr = node.links.head
-                while lCurr is not None:
+                found_flag = False
+                while lCurr is not None and not found_flag:
                     if lCurr.getValue().getLabel() == colcurr.getValue():
                         found = 1
-                        break
-                    lCurr = lCurr.getNext()
+                        found_flag = True
+                    else:
+                        lCurr = lCurr.getNext()
                 row_str += f"{found:>{col_width}}"
                 colcurr = colcurr.getNext()
             print(row_str)

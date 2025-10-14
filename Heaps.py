@@ -48,7 +48,8 @@ class DSAHeap:
         return rootEntry
     
     def trickleUp(self, index):
-        while index > 0:
+        keepGoing = True
+        while index > 0 and keepGoing:
             parentIdx = (index - 1) // 2
             if self.heap[index].getPriority() > self.heap[parentIdx].getPriority():
                 temp = self.heap[parentIdx]
@@ -56,7 +57,7 @@ class DSAHeap:
                 self.heap[index] = temp
                 index = parentIdx
             else:
-                break
+                keepGoing = False
     
     def trickleDown(self, index):
         leftChildIdx = (index * 2) + 1

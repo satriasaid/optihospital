@@ -1,4 +1,5 @@
 from Hospital import *
+from LinkedList import DSALinkedList
 
 # Graph Algorithm Functions
 def bfs_group_by_level(graph, startLabel):
@@ -63,62 +64,106 @@ def bfs_group_by_level(graph, startLabel):
         levelPtr = levelPtr.getNext()
         levelIdx += 1
 
-class CycleState:
-    def __init__(self):
-        self.foundCycle = False
-        self.cycleStart = None
-        self.cycleEnd = None
-
 def dfs_detect_cycle(graph, startLabel):
-    parentMap = DSALinkedMap()
-    onPath = DSALinkedMap()
-    state = CycleState()
-
-    def visit(node, parent):
-        label = node.getLabel()
-        onPath.set(label, True)
-        nbrs = node.getLinks().head
-        while nbrs is not None:
-            nbrNode = nbrs.getValue()
-            nbrLabel = nbrNode.getLabel()
-            if parent is not None and nbrLabel == parent.getLabel():
-                nbrs = nbrs.getNext()
-                continue
-            if onPath.has(nbrLabel):
-                state.foundCycle = True
-                state.cycleStart = nbrLabel
-                state.cycleEnd = label
-                parentMap.set(nbrLabel, label)
-                return True
-            if not parentMap.has(nbrLabel):
-                parentMap.set(nbrLabel, label)
-                if visit(nbrNode, node):
-                    return True
-            nbrs = nbrs.getNext()
-        onPath.set(label, False)
-        return False
-
-    root = graph.getVertex(startLabel)
-    parentMap.set(startLabel, None)
-    visit(root, None)
-    print("DFS Cycle Detection:")
-    if not state.foundCycle:
-        print("No cycles found.")
+    graph.clearVisited()
+    node = graph.getVertex(startLabel)
+    if node is None:
+        print("Start vertex not found.")
+        return DSALinkedList()
+    longest_cycle = DSALinkedList()
+    path = DSALinkedList()
+    
+    def removeLast(ll):
+        if ll.head is None:
+            return
+        if ll.head == ll.tail:
+            ll.head = None
+            ll.tail = None
+            return
+        curr = ll.head
+        while curr.getNext() != ll.tail:
+            curr = curr.getNext()
+        curr.setNext(None)
+        ll.tail = curr
+    
+    def getLength(ll):
+        count = 0
+        curr = ll.head
+        while curr is not None:
+            count += 1
+            curr = curr.getNext()
+        return count
+    
+    def dfs(current, parent):
+        current.setVisited(True)
+        path.insertLast(current.getLabel())
+        
+        lCurr = current.links.head
+        while lCurr is not None:
+            nbr = lCurr.getValue()
+            is_parent = (nbr == parent)
+            if not is_parent:
+                if not nbr.getVisited():
+                    dfs(nbr, current)
+                else:
+                    pCurr = path.head
+                    in_path = False
+                    while pCurr is not None:
+                        if pCurr.getValue() == nbr.getLabel():
+                            in_path = True
+                        pCurr = pCurr.getNext()
+                    if in_path:
+                        idx = 0
+                        pCurr = path.head
+                        found = False
+                        while pCurr is not None and not found:
+                            if pCurr.getValue() == nbr.getLabel():
+                                found = True
+                            else:
+                                idx += 1
+                                pCurr = pCurr.getNext()
+                        cycle = DSALinkedList()
+                        pCurr = path.head
+                        count = 0
+                        while pCurr is not None and count < idx:
+                            pCurr = pCurr.getNext()
+                            count += 1
+                        while pCurr is not None:
+                            cycle.insertLast(pCurr.getValue())
+                            pCurr = pCurr.getNext()
+                        cycle.insertLast(nbr.getLabel())
+                        contains_start = False
+                        clCurr = cycle.head
+                        while clCurr is not None:
+                            if clCurr.getValue() == startLabel:
+                                contains_start = True
+                            clCurr = clCurr.getNext()
+                        if contains_start and getLength(cycle) > getLength(longest_cycle):
+                            longest_cycle.head = None
+                            longest_cycle.tail = None
+                            clCurr = cycle.head
+                            while clCurr is not None:
+                                longest_cycle.insertLast(clCurr.getValue())
+                                clCurr = clCurr.getNext()
+            lCurr = lCurr.getNext()
+        removeLast(path)
+    
+    dfs(node, None)
+    if longest_cycle.head is not None:
+        print("Cycle detected:")
+        cycle_str = ""
+        clCurr = longest_cycle.head
+        while clCurr is not None:
+            cycle_str += clCurr.getValue() + " "
+            clCurr = clCurr.getNext()
+        print(cycle_str.strip())
     else:
-        pathLL = DSALinkedList()
-        curr = state.cycleEnd
-        while curr != state.cycleStart:
-            pathLL.insertFirst(curr)
-            curr = parentMap.get(curr)
-        pathLL.insertFirst(state.cycleStart)
-        print("Cycle found: ", end=" ")
-        p = pathLL.head
-        while p is not None:
-            print(p.getValue(), end=", ")
-            p = p.getNext()
-        print()
+        print("No cycle detected.")
+    return longest_cycle
 
 def a_star_shortest_path(graph, weightList, src, dst):
+    #Source: https://www.geeksforgeeks.org/dsa/a-search-algorithm/
+    #Source: https://www.geeksforgeeks.org/python/python-program-for-dijkstras-shortest-path-algorithm-greedy-algo-7/
     pq = PriorityQueue()
     dist = DSALinkedMap()
     prev = DSALinkedMap()
@@ -126,23 +171,25 @@ def a_star_shortest_path(graph, weightList, src, dst):
     dist.set(src, 0)
     prev.set(src, None)
 
-    while not pq.isEmpty():
+    found = False
+    while not pq.isEmpty() and not found:
         curr, currCost = pq.dequeue()
         currLabel = curr
         if currLabel == dst:
-            break
-        node = graph.getVertex(currLabel)
-        nbrs = node.getLinks().head
-        while nbrs is not None:
-            nbrNode = nbrs.getValue()
-            nbrLabel = nbrNode.getLabel()
-            w = weightList.getWeight(currLabel, nbrLabel)
-            alt = dist.get(currLabel) + w
-            if not dist.has(nbrLabel) or alt < dist.get(nbrLabel):
-                dist.set(nbrLabel, alt)
-                prev.set(nbrLabel, currLabel)
-                pq.enqueue(nbrLabel, alt)
-            nbrs = nbrs.getNext()
+            found = True
+        else:
+            node = graph.getVertex(currLabel)
+            nbrs = node.getLinks().head
+            while nbrs is not None:
+                nbrNode = nbrs.getValue()
+                nbrLabel = nbrNode.getLabel()
+                w = weightList.getWeight(currLabel, nbrLabel)
+                alt = dist.get(currLabel) + w
+                if not dist.has(nbrLabel) or alt < dist.get(nbrLabel):
+                    dist.set(nbrLabel, alt)
+                    prev.set(nbrLabel, currLabel)
+                    pq.enqueue(nbrLabel, alt)
+                nbrs = nbrs.getNext()
 
     pathLL = DSALinkedList()
     crawl = dst

@@ -5,6 +5,9 @@ import matplotlib.pyplot as plt
 import sys
 import io
 import matplotlib.pyplot as plt
+import csv
+import numpy as np
+import time
 
 # importing custom classes and functions
 from Hospital import *
@@ -15,6 +18,11 @@ from Patients import *
 from PatientSort import benchmark_sorts_np
 from Heaps import *
 from Emergency import *
+from PatientSort import benchmark_sorts_np, generate_patients_np, priorities_from_patients, stable_patients_by_priority
+from HashTable import DSAHashTable
+from Emergency import EmergencyScheduler
+from AdvancedSort import mergeSort, quickSortMedian3
+
 
 # the setup of tabs in the main webpage
 tab1, tab2, tab3, tab4 = st.tabs(["Hospital Graph", "Patient Records", "Patient Priority Queue", "Sorting Benchmarks"])
@@ -43,13 +51,12 @@ with tab1:
         corridors_df = pd.read_csv(corridors_file)
         if all(col in corridors_df.columns for col in ["DepartmentA", "DepartmentB", "WalkingTime"]):
             for _, row in corridors_df.iterrows():
-                try:
-                    deptA = str(row["DepartmentA"]).strip()
-                    deptB = str(row["DepartmentB"]).strip()
-                    weight = int(row["WalkingTime"])
+                deptA = str(row["DepartmentA"]).strip()
+                deptB = str(row["DepartmentB"]).strip()
+                weight_str = str(row["WalkingTime"]).strip()
+                if deptA and deptB and weight_str.isdigit():
+                    weight = int(weight_str)
                     corridors.append((deptA, deptB, weight))
-                except (ValueError, TypeError):
-                    continue
             st.write("Loaded Corridors:", corridors)
         else:
             st.error("CSV must have 'DepartmentA', 'DepartmentB', and 'WalkingTime' columns.")
@@ -345,3 +352,58 @@ with tab4:
             st.pyplot(fig)
         except Exception as e:
             st.error(f"Error running benchmark: {e}")
+    
+    st.subheader("Generate Patient CSVs")
+    size = st.number_input("Size", min_value=1, value=100)
+    disorder = st.selectbox("Disorder", ["random", "nearly_sorted", "reversed"])
+    seed = st.number_input("Seed", min_value=0, value=42)
+    sort_algorithm = st.selectbox("Sorting Algorithm", ["mergeSort", "quickSortMedian3"])
+
+    if st.button("Generate CSVs"):
+        # Set up dummy scheduler
+        dummy_table = DSAHashTable()
+        scheduler = EmergencyScheduler(1, dummy_table)
+
+        # Generate patients
+        patients = generate_patients_np(size, seed=seed, disorder=disorder)
+
+        # Compute priorities
+        priorities = priorities_from_patients(patients, scheduler)
+
+        # Function to write patients to CSV
+        def write_patients_to_csv(filename, patients_array, priorities_array=None):
+            with open(filename, 'w', newline='') as csvfile:
+                fieldnames = ['Patient_ID', 'Name', 'Age', 'Department', 'Urgency', 'Status', 'Duration', 'Priority']
+                writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+                writer.writeheader()
+                for i, patient in enumerate(patients_array):
+                    priority = priorities_array[i] if priorities_array is not None else (6 - patient.urgency) + (1000 / patient.duration)
+                    writer.writerow({
+                        'Patient_ID': patient.patient_id,
+                        'Name': patient.name,
+                        'Age': patient.age,
+                        'Department': patient.department,
+                        'Urgency': patient.urgency,
+                        'Status': patient.status,
+                        'Duration': patient.duration,
+                        'Priority': priority
+                    })
+
+        # Non-sorted CSV
+        write_patients_to_csv('patients_nonsorted.csv', patients, priorities)
+
+        # Sorted CSV: sort priorities in descending order (highest priority first)
+        sorted_priorities = np.copy(priorities)
+        t0 = time.time()
+        if sort_algorithm == "mergeSort":
+            mergeSort(sorted_priorities)
+        elif sort_algorithm == "quickSortMedian3":
+            quickSortMedian3(sorted_priorities)
+        t1 = time.time()
+        sort_time = t1 - t0
+        # Reverse the sorted array to have highest priority first
+        sorted_priorities = sorted_priorities[::-1]
+        sorted_patients = stable_patients_by_priority(sorted_priorities, patients)
+        write_patients_to_csv('patients_sorted.csv', sorted_patients, sorted_priorities)
+
+        st.success(f"CSVs generated: patients_nonsorted.csv and patients_sorted.csv. Sorting time: {sort_time:.6f} seconds")

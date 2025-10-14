@@ -3,6 +3,7 @@ import csv
 import numpy as np
 
 class DSAHashEntry:
+    # Uses Linear Probing
     def __init__(self, key=None, value=None):
         self.key = key
         self.value = value

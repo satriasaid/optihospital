@@ -42,6 +42,7 @@ class HospitalGraph(DSAGraph):
     def getWeight(self, label1, label2):
         return self.weightList.getWeight(label1, label2)
 
+# dictionary like data structure
 class MapNode:
     def __init__(self, key, value):
         self.key = key

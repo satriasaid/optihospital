@@ -41,14 +41,15 @@ def stable_patients_by_priority(sorted_priorities, original_patients):
     used = np.zeros(size, dtype=bool)
     for i in range(size):
         v = sorted_priorities[i]
+        found = False
         for j in range(size):
-            if not used[j]:
+            if not used[j] and not found:
                 patient = original_patients[j]
                 priority = (6 - patient.urgency) + (1000 / patient.duration)
                 if priority == v:
                     sorted_arr[i] = patient
                     used[j] = True
-                    break
+                    found = True
     return sorted_arr
 
 def benchmark_sorts_np(sizes, disorders):
@@ -72,21 +73,24 @@ def benchmark_sorts_np(sizes, disorders):
             t3 = time.time()
             sorted_quick = stable_patients_by_priority(arr_quick, patients_copy)
             merge_ok = True
-            quick_ok = True
             for k in range(size-1):
                 if sorted_merge[k] is not None and sorted_merge[k+1] is not None:
                     pri1 = (6 - sorted_merge[k].urgency) + (1000 / sorted_merge[k].duration)
                     pri2 = (6 - sorted_merge[k+1].urgency) + (1000 / sorted_merge[k+1].duration)
                     if pri1 > pri2:
                         merge_ok = False
-                        break
+            quick_ok = True
             for k in range(size-1):
                 if sorted_quick[k] is not None and sorted_quick[k+1] is not None:
                     pri1 = (6 - sorted_quick[k].urgency) + (1000 / sorted_quick[k].duration)
                     pri2 = (6 - sorted_quick[k+1].urgency) + (1000 / sorted_quick[k+1].duration)
                     if pri1 > pri2:
                         quick_ok = False
-                        break
-            results[idx] = (size, disorder, t1-t0, t3-t2, merge_ok, quick_ok)
+            results[idx]['size'] = size
+            results[idx]['disorder'] = disorder
+            results[idx]['merge_time'] = t1-t0
+            results[idx]['quick_time'] = t3-t2
+            results[idx]['merge_ok'] = merge_ok
+            results[idx]['quick_ok'] = quick_ok
             idx += 1
     return results
