@@ -1,4 +1,7 @@
 import numpy as np
+import sys
+
+sys.setrecursionlimit(99999999)
 
 def mergeSort(A):
     _mergeSortRec(A, 0, A.size - 1)
