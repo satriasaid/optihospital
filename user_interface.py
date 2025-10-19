@@ -316,6 +316,32 @@ with tab3:
 with tab4:
     st.header("Sorting Benchmarks")
 
+    st.subheader("Sorted Patients by Expected Time")
+    expected_time_file = st.file_uploader("Upload patient_treatment.csv (columns: patient_id, expected_time)", type="csv", key="expected_time_csv")
+    sort_algorithm = st.selectbox("Sorting Algorithm", ["mergeSort", "quickSortMedian3"], key="sort_expected_time")
+    if expected_time_file is not None:
+        expected_df = pd.read_csv(expected_time_file)
+        if all(col in expected_df.columns for col in ["patient_id", "expected_time"]):
+            times = expected_df['expected_time'].values.astype(float)
+            sorted_times = np.copy(times)
+            t0 = time.time()
+            if sort_algorithm == "mergeSort":
+                mergeSort(sorted_times)
+            elif sort_algorithm == "quickSortMedian3":
+                quickSortMedian3(sorted_times)
+            t1 = time.time()
+            sort_time = t1 - t0
+            
+            sorted_indices = np.argsort(times) 
+            sorted_df = expected_df.iloc[sorted_indices].reset_index(drop=True)
+            
+            st.dataframe(sorted_df)
+            st.success(f"Table displayed: Patients sorted by ExpectedTime (ascending) using {sort_algorithm}. Sorting time: {sort_time:.6f} seconds")
+        else:
+            st.error("CSV must have columns: patient_id, expected_time.")
+    else:
+        st.info("Upload patient_treatment.csv to view the sorted table.")
+
     st.subheader("Benchmark Parameters")
     sizes_input = st.text_input("Sizes (comma-separated, e.g., 10,50,100,500,1000,5000,10000)", value="10,50,100,500,1000,5000,10000")
     disorders_input = st.text_input("Disorders (comma-separated, e.g., random,nearly_sorted,reversed)", value="random,nearly_sorted,reversed")
